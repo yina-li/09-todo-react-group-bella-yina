@@ -10,6 +10,7 @@
       homescreen on Android. See https://developers.google.com/web/fundamentals/web-app-manifest/
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json">
+    <link rel="stylesheet" href="App.css">
     <!--
       Notice the use of %PUBLIC_URL% in the tags above.
       It will be replaced with the URL of the `public` folder during the build.
@@ -22,6 +23,17 @@
     <title>React App</title>
   </head>
   <body>
+
+    <div id="myDIV" class="header">
+      <h1>Bella and Yina's To Do List</h1>
+      <input type="text" id="myInput" placeholder="Title...">
+      <span onclick="newElement()" class="addBtn">Add</span>
+    </div>
+    
+    <ul id="myUL">
+    </ul>
+
+    <script src="todo.js"></script>
     <noscript>
       You need to enable JavaScript to run this app.
     </noscript>

@@ -1,85 +1,112 @@
-import React, { Component } from 'react';
-import './Todo.css';
-import './NewTodo.js'
+var list = document.querySelector('ul');
+list.addEventListener('click', function (ev) {
+    if (ev.target.tagName === 'LI') {
+        ev.target.classList.toggle('checked');
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                console.log(this.responseText);
+            }
+        };
+        console.log(ev.target.id);
+        xhttp.open("PUT", `https://cse204.work/todos/${ev.target.id}`, true);
+        xhttp.setRequestHeader("Content-type", "application/json");
+        xhttp.setRequestHeader("x-api-key", "3d3b6b-cbe564-ffd618-b64d7b-4af84e");
+        var data = {
+            completed: ev.target.classList.contains("checked")
+        }
+        xhttp.send(JSON.stringify(data));
+    }
+}, false);
 
-class Todo extends Component {
+function newElement() {
+    var inputValue = document.getElementById("myInput").value;
+    var data = {
+        text: inputValue
+    }
+    var xhttp2 = new XMLHttpRequest();
+    xhttp2.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            var todo = JSON.parse(this.responseText);
+            console.log(todo);
 
-  constructor(props){
-    super(props);
-    this.checked = this.checked.bind(this);
-    this.remove =this.remove.bind(this);
-    this.state ={completed: this.props.completed};
-  }
-  checked(){
+        } else if (this.readyState == 4) {
+            console.log(this.responseText);
+        }
+    };
+
+    xhttp2.open("POST", "https://cse204.work/todos", true);
+    xhttp2.setRequestHeader("Content-type", "application/json");
+    xhttp2.setRequestHeader("x-api-key", "3d3b6b-cbe564-ffd618-b64d7b-4af84e");
+    xhttp2.send(JSON.stringify(data));
+    if (inputValue === '') {
+        alert("You must write something!");
+    }
+    document.getElementById("myInput").value = "";
+    loadxmldoc();
+}
+
+function loadxmldoc() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            document.getElementById("myUL").innerHTML = "";
+            var todos = JSON.parse(this.responseText);
+            for (let i = 0; i < todos.length; i++) {
+                console.log(todos[i].text);
+                var ul = document.getElementById("myUL");
+                var li = document.createElement("li");
+                li.setAttribute("id", todos[i].id);
+                // li.setAttribute("class", todos[i].completed);
+                if (todos[i].completed == true) {
+                    li.classList.toggle("checked");
+                }
+                li.appendChild(document.createTextNode(todos[i].text));
+                ul.appendChild(li);
+                addclose();
+                finishtodo();
+            }
+        }
+    };
+    xhttp.open("GET", "https://cse204.work/todos", true);
+    xhttp.setRequestHeader("x-api-key", "3d3b6b-cbe564-ffd618-b64d7b-4af84e");
+    xhttp.send();
+}
+
+loadxmldoc();
+
+function addclose() {
+        var myNodelist = document.getElementsByTagName("LI");
+        var i;
+        for (i = 0; i < myNodelist.length; i++) {
+            var span = document.createElement("SPAN");
+            var txt = document.createTextNode("\u00D7");
+            span.className = "close";
+            span.appendChild(txt);
+            myNodelist[i].appendChild(span);
+        }
+    }
     
-    var current = this;
-    var id = this.props.id;
-    var start = new XMLHttpRequest();
-    start.onreadystatechange = function(){
-      if (this.readyState === 4 && this.status === 200) {
-        console.log("completed")
-        current.setState(
-          {completed: true}
-        );
-    }
-    else{
-      console.log(this.responseText);
-    } 
-  };
-  start.open("PUT","https://cse204.work/todos/" + id, true )
-  start.setRequestHeader("x-api-key", "3d3b6b-cbe564-ffd618-b64d7b-4af84e");
-  start.setRequestHeader("Content-type", "application/json");
-  var data = {
-    completed: true
-  };
-  start.send(JSON.stringify(data));
+    function finishtodo() {
+        var close = document.getElementsByClassName("close");
+        var i;
+        for (i = 0; i < close.length; i++) {
+            close[i].onclick = function () {
+                var div = this.parentElement;
+                console.log(this.parentNode.id);
+                var postid = this.parentNode.id;
+                div.style.display = "none";
+                var xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 && this.status == 200) {
+                        console.log(this.responseText);
+                    }
+                };
+                xhttp.open("DELETE", `https://cse204.work/todos/${postid}`, true);
+                xhttp.setRequestHeader("x-api-key", "3d3b6b-cbe564-ffd618-b64d7b-4af84e");
+                xhttp.send();
+            }
+        }
+    }s
 
-}
-remove(){
-  var id = this.props.id;
-  var current = this;
-  var del = new XMLHttpRequest();
-  del.onreadystatechange = function(){
-    if (this.readyState === 4 && this.status === 200) {
-      current.props.remove(id);
 
-  }
-  else{
-    console.log(this.responseText);
-
-  }
-};
-
-  
-del.open("DELETE","https://cse204.work/todos/" + id, true )
-del.setRequestHeader("x-api-key", "3d3b6b-cbe564-ffd618-b64d7b-4af84e");
-del.setRequestHeader("Content-type", "application/json");
-del.send();
-
-}
-
-  render() {
-    var className="todo";
-    if (this.state.completed) {
-      className = "strikethrough";
-    }
-
-    return (
-      <div id = {this.props.id} className={className}>
-      {/* <ul ClassName="list"> */}
-          <li>
-            <button type = "checkbox" className="check" onClick={this.checked} >Complete</button>
-          <text>{this.props.text} </text>
-          <button className = "remove" onClick={this.remove}>Delete</button>
-          </li>
-      {/* </ul> */}
-    </div>
-      
-  
-  
-
-    );
-  }
-}
-
-export default Todo;
